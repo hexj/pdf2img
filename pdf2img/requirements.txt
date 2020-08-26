@@ -1,0 +1,4 @@
+PIL
+pdf2image
+numpy
+click
