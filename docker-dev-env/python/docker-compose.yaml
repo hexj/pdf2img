@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  backend:
+    restart: always
+    container_name: trash-py3
+    image: py3
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./what-trash:/app
+    ports:
+      - 1028:1028
+    entrypoint:
+        - /bin/sh
+        - -c
+        - |
+            pip3 install -r /app/requirements.txt 
+            cd /app && gunicorn -b 0.0.0.0:1028 -w 2 run:app
+  web:
+    restart: always
+    container_name: trash-node
+    image: node:alpine
+    volumes:
+      - ./what-trash:/app
+    ports:
+      - 3000:3000
+    entrypoint:
+        - /bin/sh
+        - -c
+        - |
+            cd /app && npm start
+#   redis:
+#     image: redis

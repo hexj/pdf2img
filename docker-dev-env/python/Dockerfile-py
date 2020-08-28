@@ -1,0 +1,24 @@
+FROM python:3-alpine
+
+# sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories \
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+    && cat /etc/apk/repositories \
+    && rm -rf /etc/localtime \
+    && ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" >/etc/timezone \
+    && echo -e "[global]\ntimeout = 6000\nindex-url = http://mirrors.aliyun.com/pypi/simple/\n[install]\ntrusted-host=mirrors.aliyun.com">/etc/pip.conf
+
+RUN apk add --no-cache --virtual .build-deps gcc g++ libc-dev libxslt-dev \
+    && apk add --no-cache libxslt tzdata \
+    && pip3 install --upgrade pip \
+    && pip install --no-cache-dir lxml>=3.5.0 \
+    && apk del .build-deps 
+
+COPY . /app
+WORKDIR /app
+
+ENV MODE server
+# RUN apt install -y libxml2-dev libxslt1-dev zlib1g-dev python3-pip lxml numpy gunicorn pandas
+RUN pip install -r requirements.txt
+
+ENTRYPOINT ["python","run.py"]
